@@ -107,3 +107,19 @@ json_rp <- fromJSON(raw_rp)
 
 relief_pitchers <- tibble(json_rp[[1]]) |> 
   mutate(position = "RP")
+
+# combine datasets ----
+batters_25 <- bind_rows(
+  catchers, first_basemen, second_basemen, shortstops, third_basemen,
+  left_fielders, center_fielders, right_fielders, designated_hitters
+)
+
+pitchers_25 <- bind_rows(
+  starting_pitchers, relief_pitchers
+)
+
+# save raw data ----
+dir.create("raw_data")
+
+save(batters_25, file = "raw_data/batters_25.rds")
+save(pitchers_25, file = "raw_data/pitchers_25.rds")
