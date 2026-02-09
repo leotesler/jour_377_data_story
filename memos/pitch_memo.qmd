@@ -1,0 +1,27 @@
+---
+title: "Pitch Memo"
+subtitle: |
+  | Data Story
+  | Intro to Data Journalism
+author:
+  name: Leo Tesler
+date: today
+format:
+  html:
+    toc: true
+    toc-location: left
+    embed-resources: true
+from: markdown+emoji 
+reference-location: margin
+citation-location: margin
+---
+
+## GitHub Repo Link
+
+[My GitHub Repo](https://github.com/leotesler/jour_377_data_story.git)
+
+## Story Idea
+
+MLB Spring Training is upon us, serving as the marker for the unofficial end of baseball's offseason. Since rosters have more or less taken shape, and most free agency and trade transactions have been completed, it's time to evaluate how much better or worse each team got. For my story, I will be using data from [Fangraphs](https://www.fangraphs.com/), mostly Wins Above Replacement (WAR) to accentuate the difference between 2025 performance and 2026 projections for each position group for each team. From there, I'll be able to highlight the biggest year-to-year differences and can identify what these teams did this offseason to create such drastic change.
+
+While I know that using rote WAR and projection data is not a perfect way to understand or evaluate a team's offseason moves, I believe it will be a fun and visually appealing exercise that will help my audience understand and attempt to quanitfy just how much better or worse some of these teams got.
