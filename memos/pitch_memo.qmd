@@ -191,3 +191,9 @@ gg_miss_var(pitchers_agg)
 ```
 
 Luckily, Fangraphs does a good job with maintaining their data, no nothing appears as `NA` in my missingness check.
+
+## Expert Sources to Consult
+
+Ultimately, the goal of this analysis and this story is to compare it the general consensus of teams' transactions and the offseason as a whole. Especially as we head into Spring Training, expert baseball analysts in the media will be publishing and broadcasting their thoughts on the offseason and telling the public what they think the most impactful moves are.
+
+These experts provide an alternate opinion from what the data reveals; whether its a contrasting opinion or an aligning opinion, it will provide the story with a little more color and non-analytical perspective. So I'll be sure to parse through mainstream media opinions on the topic and compare them with the baseline data-driven findings.
