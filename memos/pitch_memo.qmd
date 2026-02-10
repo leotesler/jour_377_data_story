@@ -25,3 +25,169 @@ citation-location: margin
 MLB Spring Training is upon us, serving as the marker for the unofficial end of baseball's offseason. Since rosters have more or less taken shape, and most free agency and trade transactions have been completed, it's time to evaluate how much better or worse each team got. For my story, I will be using data from [Fangraphs](https://www.fangraphs.com/), mostly Wins Above Replacement (WAR) to accentuate the difference between 2025 performance and 2026 projections for each position group for each team. From there, I'll be able to highlight the biggest year-to-year differences and can identify what these teams did this offseason to create such drastic change.
 
 While I know that using rote WAR and projection data is not a perfect way to understand or evaluate a team's offseason moves, I believe it will be a fun and visually appealing exercise that will help my audience understand and attempt to quanitfy just how much better or worse some of these teams got.
+
+## Data Source
+
+All of my raw data comes from Fangraphs, and I acquired it using two different methods. For the 2025 player performance data, I was able to use Fangraphs' major league leaderboard API endpoint, doing a separate call for each position so that the API filtered the data properly.
+
+Here is a sample of code that I used to pull data on catchers from the Fangraphs API:
+```{r}
+#| echo: false
+#| warning: false
+
+library(tidyverse)
+library(httr)
+library(rvest)
+library(jsonlite)
+
+```
+```{r}
+#| eval: false
+url_c <- "https://www.fangraphs.com/api/leaders/major-league/data?age=&pos=all&stats=bat&lg=all&qual=1&season=2025&season1=2025&startdate=2025-03-01&enddate=2025-11-01&month=35&hand=&team=0&pageitems=10000&pagenum=1&ind=0&rost=0&players=&type=8&postseason=&sortdir=default&sortstat=WAR"
+response_c <- GET(url_c)
+raw_c <- content(response_c, as = "text", encoding = "UTF-8")
+json_c <- fromJSON(raw_c)
+
+catchers <- tibble(json_c[[1]]) |> 
+  mutate(position = "C")
+```
+
+For the 2026 projections data, I had to use a different approach. Fangraphs doesn't publish their official API endpoints anywhere, so anything that doesn't appear on the traditional leaderboards is not accessible through that method. The projections that I needed were on the team depth charts page, and in HTML format, so I could just scrape the tables that way.
+
+Here's the loop that I used to iterate through 30 teams' worth of data:
+```{r}
+#| eval: false
+
+for (team_name in team_abb_map$name) {
+  url <- "https://www.fangraphs.com/teams/yankees/depth-chart"
+  page <- read_html(url)
+  
+  tables <- page |> 
+    html_nodes("table") |> 
+    html_table(fill = TRUE)
+  
+  catchers <- tables[[9]] |> 
+    mutate(position = "C")
+  
+  first_basemen <- tables[[10]] |> 
+    mutate(position = "1B")
+  
+  second_basemen <- tables[[11]] |> 
+    mutate(position = "2B")
+  
+  shortstops <- tables[[12]] |> 
+    mutate(position = "SS")
+  
+  third_basemen <- tables[[13]] |> 
+    mutate(position = "3B")
+  
+  left_fielders <- tables[[14]] |> 
+    mutate(position = "LF")
+  
+  center_fielders <- tables[[16]] |> 
+    mutate(position = "CF")
+  
+  right_fielders <- tables[[15]] |> 
+    mutate(position = "RF")
+  
+  designated_hitters <- tables[[17]] |> 
+    mutate(position = "DH")
+  
+  starting_pitchers <- tables[[19]] |> 
+    mutate(position = "SP")
+  
+  relief_pitchers <- tables[[20]] |> 
+    mutate(position = "RP")
+  
+  batters <- bind_rows(
+    catchers, first_basemen, second_basemen, shortstops, third_basemen,
+    left_fielders, center_fielders, right_fielders, designated_hitters
+  ) |> 
+    mutate(team = team_abb_map$abb[team_abb_map$name == team_name])
+  
+  pitchers <- bind_rows(
+    starting_pitchers, relief_pitchers
+  )
+  
+  batters_list[[team_name]] <- batters
+  pitchers_list[[team_name]] <- pitchers
+}
+```
+
+Scraping the data directly from the site rather than using a csv or a local file type allows me to easily update the data whenever I want; pulling from Fangraphs takes just a few minutes, and will give me the latest data when I run my code. It also gives me more data than I think I need for my story; really, I just need player names, team names and positions to aggregate by, and WAR. But what having more data allows me to do is if I discover through my analysis process that I want to add or need to add another component, I should easily be able to do that.
+
+## Exploratory Data Analysis
+
+### Data Distribution Check
+
+My initial analysis of the data shows that there is actually a story here in the way that I'm envisioning; i.e. there are sizable gaps between the best and worst position groups that I can analyze further in the context of season-to-season change, and the groups are distributed roughly normally by WAR.
+
+Below, I've aggregated the raw data by team and position, and plotted each group by WAR in a histogram:
+```{r}
+#| warning: false
+#| label: war-histogram
+
+library(here)
+
+load(here("raw_data/batters_25.rds"))
+load(here("raw_data/pitchers_25.rds"))
+
+batters_agg <- batters_25 |> 
+  janitor::clean_names() |> 
+  group_by(team_name, position) |> 
+  summarize(war = sum(war))
+
+pitchers_agg <- pitchers_25 |> 
+  janitor::clean_names() |> 
+  group_by(team_name, position) |> 
+  summarize(war = sum(war))
+
+batters_agg |>
+  bind_rows(pitchers_agg) |> 
+  ggplot(aes(x = war)) +
+  geom_histogram() +
+  theme_minimal() +
+  labs(title = "Distribution of MLB Team Position Groups, 2025",
+       x = "Wins Above Replacement",
+       y = "# of Groups")
+```
+
+The next step in my analysis, now that I have this basis, will be to aggregate the 2026 projections dataset and join it to this one, then calculate the differences between the 2025 results and 2026 projections.
+
+
+### Positional Compatibility Check
+
+The other big thing I wanted to check was if any singular position group had on average a much higher or lower WAR than some of the others, in a significant enough way that would affect the main data analysis I'm trying to do later.
+
+```{r}
+positional_agg <- batters_25 |> 
+  janitor::clean_names() |> 
+  group_by(position) |> 
+  summarize(avg_war = sum(war)/30)
+
+pitcher_agg <- pitchers_25 |> 
+  janitor::clean_names() |> 
+  group_by(position) |> 
+  summarize(avg_war = sum(war)/30)
+
+positional_agg |> 
+  bind_rows(pitcher_agg) |> 
+  arrange(desc(avg_war)) |> 
+  print(n = Inf)
+```
+
+It looks like there's a pretty drastic spread between mean WAR by position, with starting pitchers serving as an extreme outlier. So that means one of two things for the purposes of my story: either I ride with the values as they are and explain that the difference comes from the difference in importance between the positions, or I normalize the positional groups to their respective means so that I can make sure some of the positions on the lower end of the WAR spectrum get their time in the sun.
+
+Right now, I'm leaning towards not normalizing the positional groups because I think the difference in value between positions is worth accentuating when evaluating a team's offseason. For example, the reason an increase from an average shortstop to a great shortstop is much greater than an increase from an average first baseman to a great first baseman is because there is more intrinsic value in that position. I fear that normalizing the values would be tricking myself into thinking all upgrades are created equal.
+
+### Data Missingness Check
+
+The plot below shows the number of missing observations in each column of the aggregated data:
+```{r}
+library(naniar)
+
+gg_miss_var(batters_agg)
+gg_miss_var(pitchers_agg)
+```
+
+Luckily, Fangraphs does a good job with maintaining their data, no nothing appears as `NA` in my missingness check.
