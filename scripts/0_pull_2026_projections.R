@@ -30,7 +30,7 @@ batters_list <- list()
 pitchers_list <- list()
 
 for (team_name in team_abb_map$name) {
-  url <- "https://www.fangraphs.com/teams/yankees/depth-chart"
+  url <- paste0("https://www.fangraphs.com/teams/", team_name, "/depth-chart")
   page <- read_html(url)
   
   tables <- page |> 
@@ -78,7 +78,8 @@ for (team_name in team_abb_map$name) {
   
   pitchers <- bind_rows(
     starting_pitchers, relief_pitchers
-  )
+  ) |> 
+    mutate(team = team_abb_map$abb[team_abb_map$name == team_name])
   
   batters_list[[team_name]] <- batters
   pitchers_list[[team_name]] <- pitchers

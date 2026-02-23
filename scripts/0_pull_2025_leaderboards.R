@@ -82,7 +82,7 @@ right_fielders <- tibble(json_rf[[1]]) |>
   mutate(position = "RF")
 
 # designated hitters
-url_dh <- "https://www.fangraphs.com/api/leaders/major-league/data?age=&pos=all&stats=bat&lg=all&qual=1&season=2025&season1=2025&startdate=2025-03-01&enddate=2025-11-01&month=40&hand=&team=0%2Cto&pageitems=10000&pagenum=1&ind=0&rost=0&players=&type=8&postseason=&sortdir=default&sortstat=WAR"
+url_dh <- "https://www.fangraphs.com/api/leaders/major-league/data?age=&pos=all&stats=bat&lg=all&qual=1&season=2025&season1=2025&startdate=2025-03-01&enddate=2025-11-01&month=44&hand=&team=0%2Cto&pageitems=10000&pagenum=1&ind=0&rost=0&players=&type=8&postseason=&sortdir=default&sortstat=WAR"
 response_dh <- GET(url_dh)
 raw_dh <- content(response_dh, as = "text", encoding = "UTF-8")
 json_dh <- fromJSON(raw_dh)
@@ -91,7 +91,7 @@ designated_hitters <- tibble(json_dh[[1]]) |>
   mutate(position = "DH")
 
 # starting pitchers
-url_sp <- "https://www.fangraphs.com/api/leaders/major-league/data?age=&pos=all&stats=sta&lg=all&qual=y&season=2025&season1=2025&startdate=2025-03-01&enddate=2025-11-01&month=0&hand=&team=0%2Cto&pageitems=10000&pagenum=1&ind=0&rost=0&players=&type=8&postseason=&sortdir=default&sortstat=WAR"
+url_sp <- "https://www.fangraphs.com/api/leaders/major-league/data?age=&pos=all&stats=sta&lg=all&qual=0&season=2025&season1=2025&startdate=2025-03-01&enddate=2025-11-01&month=0&hand=&team=0%2Cto&pageitems=10000&pagenum=1&ind=0&rost=0&players=&type=8&postseason=&sortdir=default&sortstat=WAR"
 response_sp <- GET(url_sp)
 raw_sp <- content(response_sp, as = "text", encoding = "UTF-8")
 json_sp <- fromJSON(raw_sp)
@@ -100,7 +100,7 @@ starting_pitchers <- tibble(json_sp[[1]]) |>
   mutate(position = "SP")
 
 # relief pitchers
-url_rp <- "https://www.fangraphs.com/api/leaders/major-league/data?age=&pos=all&stats=rel&lg=all&qual=y&season=2025&season1=2025&startdate=2025-03-01&enddate=2025-11-01&month=0&hand=&team=0%2Cto&pageitems=10000&pagenum=1&ind=0&rost=0&players=&type=8&postseason=&sortdir=default&sortstat=WAR"
+url_rp <- "https://www.fangraphs.com/api/leaders/major-league/data?age=&pos=all&stats=rel&lg=all&qual=0&season=2025&season1=2025&startdate=2025-03-01&enddate=2025-11-01&month=0&hand=&team=0%2Cto&pageitems=10000&pagenum=1&ind=0&rost=0&players=&type=8&postseason=&sortdir=default&sortstat=WAR"
 response_rp <- GET(url_rp)
 raw_rp <- content(response_rp, as = "text", encoding = "UTF-8")
 json_rp <- fromJSON(raw_rp)
