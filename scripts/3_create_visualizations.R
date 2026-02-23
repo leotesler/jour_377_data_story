@@ -48,15 +48,15 @@ team_diff <- group_diff |>
 team_diff |>
   left_join(color_map, by = join_by(team_name == team)) |> 
   mutate(team_name = factor(team_name)) |> 
-  ggplot(aes(x = reorder(team_name, -rank_diff), y = rank_diff, fill = hex_code)) +
+  ggplot(aes(x = reorder(team_name, -diff), y = diff, fill = hex_code)) +
   geom_col(width = 0.8) +
   geom_text(
     aes(
       label = team_name,
-      y = if_else(rank_diff > 0, rank_diff - 0.5, rank_diff + 0.5)
+      y = if_else(diff > 0, diff - 0.5, diff + 0.5)
     ),
     size = 2,
-    color = if_else(abs(team_diff$rank_diff) > 0, "white", "black"),
+    color = if_else(abs(team_diff$diff) > 0, "white", "black"),
     fontface = "bold"
   ) +
   scale_fill_identity()
