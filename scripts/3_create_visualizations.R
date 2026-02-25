@@ -82,26 +82,29 @@ ggsave(filename = "plots/team_war_diff.png")
 for (p in unique(group_diff$position)) {
   plot <- group_diff |> 
     filter(position == p) |> 
-    mutate(war_25_rank = 31 - rank(war_25),
-           war_26_rank = 31 - rank(war_26),
-           rank_diff = war_25_rank - war_26_rank) |> 
-    arrange(rank_diff) |> 
+    mutate(
+      war_25_norm = round((war_25 - mean(war_25))/sd(war_25), digits = 1),
+      war_26_norm = round((war_26 - mean(war_26))/sd(war_26), digits = 1),
+      diff_norm = war_26_norm - war_25_norm
+    ) |> 
+    arrange(diff_norm) |> 
     left_join(color_map, by = join_by(team_name == team)) |> 
-    ggplot(aes(x = war_25_rank, y = war_26_rank, colour = hex_code, label = team_name)) +
-    geom_vline(xintercept = 15, linetype = "dotted", linewidth = 0.8) +
-    geom_hline(yintercept = 15, linetype = "dotted", linewidth = 0.8) +
+    ggplot(aes(x = war_25_norm, y = war_26_norm, colour = hex_code, label = team_name)) +
+    geom_vline(xintercept = 0, linetype = "dotted", linewidth = 0.8) +
+    geom_hline(yintercept = 0, linetype = "dotted", linewidth = 0.8) +
+    geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
     geom_point(size = 3) +
     geom_text_repel(size = 3, max.overlaps = Inf) +
     scale_color_identity() +
-    scale_x_reverse() +
-    scale_y_reverse() +
     labs(
-      title = paste0("WAR rankings for MLB ", p, ", 2025 vs 2026 (projected)"),
+      title = paste0("Normalized WAR scatterplot for MLB ", p, ", 2025 vs 2026 (projected)"),
       subtitle = "Quadrants separate differences in change in production",
-      x = paste0("2025 ", p, " WAR Rank"),
-      y = paste0("2026 Projected ", p, " WAR Rank")
+      x = paste0("2025 ", p, " Normalized WAR"),
+      y = paste0("2026 Projected ", p, " Normalized WAR")
     ) +
     theme_minimal()
+  
+  ggsave(filename = paste0("plots/war_norm_scatterplot_", p, ".png"))
   
   print(plot)
 }
