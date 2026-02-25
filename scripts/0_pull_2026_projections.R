@@ -30,6 +30,10 @@ batters_list <- list()
 pitchers_list <- list()
 
 for (team_name in team_abb_map$name) {
+  misordered_teams <- c(
+    "braves", "brewers", "diamondbacks", "dodgers", "padres", "yankees"
+  )
+  
   url <- paste0("https://www.fangraphs.com/teams/", team_name, "/depth-chart")
   page <- read_html(url)
   
@@ -55,11 +59,21 @@ for (team_name in team_abb_map$name) {
   left_fielders <- tables[[14]] |> 
     mutate(position = "LF")
   
-  center_fielders <- tables[[16]] |> 
-    mutate(position = "CF")
+  if (team_name %in% misordered_teams) {
+    center_fielders <- tables[[16]] |> 
+      mutate(position = "CF")
+  } else {
+    center_fielders <- tables[[15]] |> 
+      mutate(position = "CF")
+  }
   
-  right_fielders <- tables[[15]] |> 
-    mutate(position = "RF")
+  if (team_name %in% misordered_teams) {
+    right_fielders <- tables[[15]] |> 
+      mutate(position = "RF")
+  } else {
+    right_fielders <- tables[[16]] |> 
+      mutate(position = "RF")
+  }
   
   designated_hitters <- tables[[17]] |> 
     mutate(position = "DH")

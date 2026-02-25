@@ -4,6 +4,9 @@
 library(tidyverse)
 library(here)
 library(ggrepel)
+library(knitr)
+library(kableExtra)
+library(webshot2)
 
 # load data ----
 load(here("clean_data/players_full.rds"))
@@ -59,7 +62,21 @@ team_diff |>
     color = if_else(abs(team_diff$diff) > 0, "white", "black"),
     fontface = "bold"
   ) +
-  scale_fill_identity()
+  scale_fill_identity() +
+  theme_minimal() +
+  theme(
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  labs(
+    title = "Team Difference in fWAR, 2025 to 2026 (Projected)",
+    x = "Team",
+    y = "fWAR differential"
+  )
+
+dir.create("plots")
+
+ggsave(filename = "plots/team_war_diff.png")
 
 # plot WAR rank difference by position ----
 for (p in unique(group_diff$position)) {
@@ -88,3 +105,61 @@ for (p in unique(group_diff$position)) {
   
   print(plot)
 }
+
+# 10 biggest fWAR decreases table ----
+biggest_fwar_decrease <- group_diff |> 
+  select(team_name, position, war_25, war_26, diff) |>
+  mutate(war_25 = round(war_25, digits = 1),
+         diff = round(diff, digits = 1)) |> 
+  arrange(diff) |> 
+  slice_head(n = 10) |> 
+  kable(
+    format = "html",
+    col.names = c("Team", "Position", "2025 fWAR", "2026 fWAR", "Difference"),
+    caption = "Largest Decreases in fWAR from 2025 to 2026"
+  ) |> 
+  kable_styling(latex_options = c("striped", "scale_down"), full_width = FALSE)
+
+save_kable(biggest_fwar_decrease, file = "plots/biggest_fwar_decrease.png", zoom = 2)
+
+# 10 biggest normalized fWAR decreases table ----
+biggest_norm_fwar_decrease <- group_diff |> 
+  group_by(position) |> 
+  mutate(
+    war_25_norm = round((war_25 - mean(war_25))/sd(war_25), digits = 1),
+    war_26_norm = round((war_26 - mean(war_26))/sd(war_26), digits = 1),
+    diff_norm = war_26_norm - war_25_norm
+  ) |> 
+  ungroup() |> 
+  select(team_name, position, war_25_norm, war_26_norm, diff_norm) |>
+  arrange(diff_norm) |> 
+  slice_head(n = 10) |> 
+  kable(
+    format = "html",
+    col.names = c("Team", "Position", "2025 Norm. fWAR", "2026 Norm. fWAR", "Difference"),
+    caption = "Largest Decreases in Normalized fWAR from 2025 to 2026"
+  ) |> 
+  kable_styling(latex_options = c("striped", "scale_down"), full_width = FALSE)
+
+save_kable(biggest_norm_fwar_decrease, file = "plots/biggest_norm_fwar_decrease.png", zoom = 2)
+
+# 10 biggest normalized fWAR increases table ----
+biggest_norm_fwar_increase <- group_diff |> 
+  group_by(position) |> 
+  mutate(
+    war_25_norm = round((war_25 - mean(war_25))/sd(war_25), digits = 1),
+    war_26_norm = round((war_26 - mean(war_26))/sd(war_26), digits = 1),
+    diff_norm = war_26_norm - war_25_norm
+  ) |> 
+  ungroup() |> 
+  select(team_name, position, war_25_norm, war_26_norm, diff_norm) |>
+  arrange(desc(diff_norm)) |> 
+  slice_head(n = 10) |> 
+  kable(
+    format = "html",
+    col.names = c("Team", "Position", "2025 Norm. fWAR", "2026 Norm. fWAR", "Difference"),
+    caption = "Largest Increases in Normalized fWAR from 2025 to 2026"
+  ) |> 
+  kable_styling(latex_options = c("striped", "scale_down"), full_width = FALSE)
+
+save_kable(biggest_norm_fwar_increase, file = "plots/biggest_norm_fwar_increase.png", zoom = 2)

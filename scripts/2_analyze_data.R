@@ -29,7 +29,25 @@ group_diff |>
   mutate(war_25_rank = 31 - rank(war_25),
          war_26_rank = 31 - rank(war_26),
          rank_diff = war_25_rank - war_26_rank) |> 
-  arrange(rank_diff)
+  ungroup() |> 
+  arrange(war_25)
+
+group_diff |> 
+  group_by(team_name) |> 
+  summarize(war_25 = sum(war_25),
+            war_26 = sum(war_26),
+            diff = sum(diff)) |> 
+  arrange(war_26)
+
+# Normalize WAR values ----
+group_diff |> 
+  group_by(position) |> 
+  mutate(
+    war_25_norm = (war_25 - mean(war_25))/sd(war_25),
+    war_26_norm = (war_26 - mean(war_26))/sd(war_26),
+    diff_norm = war_26_norm - war_25_norm
+  ) |> 
+  arrange(desc(diff))
 
 # inspect raw data to understand differences ----
 batters_25 |> 
