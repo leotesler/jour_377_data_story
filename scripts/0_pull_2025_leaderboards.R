@@ -13,7 +13,7 @@ library(jsonlite)
 url_c <- "https://www.fangraphs.com/api/leaders/major-league/data?age=&pos=all&stats=bat&lg=all&qual=1&season=2025&season1=2025&startdate=2025-03-01&enddate=2025-11-01&month=35&hand=&team=0%2Cto&pageitems=10000&pagenum=1&ind=0&rost=0&players=&type=8&postseason=&sortdir=default&sortstat=WAR"
 response_c <- GET(url_c)
 raw_c <- content(response_c, as = "text", encoding = "UTF-8")
-json_c <- fromJSON(raw_c)
+json_c <- fromJSON(raw_c) # Fangraphs API stores data in JSON form at specified links
 
 catchers <- tibble(json_c[[1]]) |> 
   mutate(position = "C")
@@ -110,6 +110,7 @@ relief_pitchers <- tibble(json_rp[[1]]) |>
 
 # combine datasets ----
 batters_25 <- bind_rows(
+  # Binds tibbles from each position's API call together
   catchers, first_basemen, second_basemen, shortstops, third_basemen,
   left_fielders, center_fielders, right_fielders, designated_hitters
 )
@@ -121,5 +122,5 @@ pitchers_25 <- bind_rows(
 # save raw data ----
 dir.create("raw_data")
 
-save(batters_25, file = "raw_data/batters_25.rds")
+save(batters_25, file = "raw_data/batters_25.rds") # Saves out files in R-machine readable format
 save(pitchers_25, file = "raw_data/pitchers_25.rds")
