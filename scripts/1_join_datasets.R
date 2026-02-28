@@ -29,21 +29,15 @@ batters_26_agg <- batter_proj_26 |> # Aggregates data from player-level to team/
   janitor::clean_names() |> 
   mutate(team_name = team,
          .keep = "unused") |> 
-  filter(name != "Total") |> 
-  group_by(team_name, position) |> 
-  summarize(war = sum(war, na.rm = TRUE)) |> 
-  arrange(desc(war)) |> 
-  ungroup()
+  filter(name == "Total") |>
+  arrange(desc(war))
 
 pitchers_26_agg <- pitcher_proj_26 |> # Aggregates data from player-level to team/position level
   janitor::clean_names() |> 
   mutate(team_name = team,
          .keep = "unused") |> 
-  filter(name != "Total") |> 
-  group_by(team_name, position) |> 
-  summarize(war = sum(war, na.rm = TRUE)) |> 
-  arrange(desc(war)) |> 
-  ungroup()
+  filter(name == "Total") |> 
+  arrange(desc(war))
 
 players_25 <- bind_rows( # Combines all 2025 data
   batters_25_agg, pitchers_25_agg
