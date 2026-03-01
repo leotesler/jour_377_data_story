@@ -3,6 +3,7 @@
 # load libraries ----
 library(tidyverse)
 library(here)
+library(ggtext)
 library(ggrepel)
 library(knitr)
 library(kableExtra)
@@ -69,14 +70,17 @@ team_diff |> # Team WAR differential bar chart
   ) +
   scale_fill_identity() + # Recognizes hex codes as hex codes instead of text
   theme_minimal() +
-  theme(
-    axis.ticks.x = element_blank(), # Takes team names off of x-axis
-    axis.text.x = element_blank()
-  ) +
   labs(
     title = "Team Difference in fWAR, 2025 to 2026 (Projected)",
+    subtitle = "Dodgers (LAD) towards middle of the pack",
     x = "Team",
-    y = "fWAR differential"
+    y = "fWAR differential",
+    caption = "Source: Fangraphs (fangraphs.com/leaders)"
+  ) +
+  theme(
+    axis.ticks.x = element_blank(), # Takes team names off of x-axis
+    axis.text.x = element_blank(),
+    plot.caption = element_text(hjust = 0)
   )
 
 dir.create("plots")
@@ -107,7 +111,8 @@ for (p in unique(group_diff$position)) {
       title = paste0("Normalized WAR scatterplot for MLB ", p, ", 2025 vs 2026 (projected)"),
       subtitle = "Quadrants separate differences in change in production",
       x = paste0("2025 ", p, " Normalized WAR"),
-      y = paste0("2026 Projected ", p, " Normalized WAR")
+      y = paste0("2026 Projected ", p, " Normalized WAR"),
+      caption = "Source: Fangraphs (fangraphs.com/leaders)"
     ) +
     theme_minimal()
   
